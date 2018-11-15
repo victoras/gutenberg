@@ -197,6 +197,7 @@ export default compose( [
 			getCurrentPostId,
 			getCurrentPostAttribute,
 			getEditedPostAttribute,
+			getAutosave,
 			isEditedPostSaveable,
 			isEditedPostAutosaveable,
 			getEditedPostPreviewLink,
@@ -207,8 +208,10 @@ export default compose( [
 
 		const previewLink = getEditedPostPreviewLink();
 		const postType = getPostType( getEditedPostAttribute( 'type' ) );
+		const postId = getCurrentPostId();
 		return {
-			postId: getCurrentPostId(),
+			postId,
+			autosave: getAutosave( postId ),
 			currentPostLink: getCurrentPostAttribute( 'link' ),
 			previewLink: forcePreviewLink !== undefined ? forcePreviewLink : previewLink,
 			isSaveable: isEditedPostSaveable(),
