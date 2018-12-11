@@ -1056,8 +1056,14 @@ function gutenberg_editor_scripts_and_styles( $hook ) {
 		'heartbeat-connection-restored',
 		'heartbeat-nonces-expired',
 	].join( ' ' ), function( event ) {
-		var actionName = event.type.replace( /-/g, '.' );
-		wp.hooks.doAction.apply( null, [ actionName ].concat( [].slice.call( arguments, 1 ) ) );
+		var actionName = event.type.replace( /-/g, '.' ),
+			args;
+
+		// Omit the event argument in applying arguments to the hook callback.
+		// The remaining arguments are passed to the hook.
+		args = Array.prototype.slice.call( arguments, 1 );
+
+		wp.hooks.doAction.apply( null, [ actionName ].concat( args ) );
 	} );
 } )();
 JS;
