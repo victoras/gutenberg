@@ -68,7 +68,6 @@
 		"@wordpress/postcss-themes": "file:packages/postcss-themes",
 		"@wordpress/scripts": "file:packages/scripts",
 		"@wordpress/tests-e2e": "file:packages/tests-e2e",
-		"autoprefixer": "8.2.0",
 		"babel-loader": "8.0.0",
 		"benchmark": "2.1.4",
 		"browserslist": "3.2.8",
