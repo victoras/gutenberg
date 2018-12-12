@@ -148,6 +148,46 @@ Return Upload Permissions.
 
 Upload Permissions.
 
+### getAutosaveAttribute
+
+Returns an attribute value of the current autosave revision for a post, or
+null if there is no autosave for the post.
+
+*Parameters*
+
+ * state: Global application state.
+ * attributeName: Autosave attribute name.
+
+*Returns*
+
+Autosave attribute value.
+
+### getAutosave
+
+Returns the current autosave, or null if one is not set (i.e. if the post
+has yet to be autosaved, or has been saved or published since the last
+autosave).
+
+*Parameters*
+
+ * state: Editor state.
+
+*Returns*
+
+Current autosave, if exists.
+
+### hasAutosave
+
+Returns the true if there is an existing autosave, otherwise false.
+
+*Parameters*
+
+ * state: Global application state.
+
+*Returns*
+
+Whether there is an existing autosave.
+
 ## Actions
 
 ### receiveUserQuery
@@ -214,3 +254,12 @@ Returns an action object used in signalling that Upload permissions have been re
 *Parameters*
 
  * hasUploadPermissions: Does the user have permission to upload files?
+
+### resetAutosave
+
+Returns an action object used in signalling that the latest autosave of the
+post has been received, by initialization or autosave.
+
+*Parameters*
+
+ * post: Autosave post object.

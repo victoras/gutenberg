@@ -193,20 +193,6 @@ saved state of the post.
 
 Post attribute value.
 
-### getAutosaveAttribute
-
-Returns an attribute value of the current autosave revision for a post, or
-null if there is no autosave for the post.
-
-*Parameters*
-
- * state: Global application state.
- * attributeName: Autosave attribute name.
-
-*Returns*
-
-Autosave attribute value.
-
 ### getEditedPostVisibility
 
 Returns the current visibility of the post being edited, preferring the
@@ -303,36 +289,11 @@ Returns true if the post can be autosaved, or false otherwise.
 *Parameters*
 
  * state: Global application state.
+ * autosave: An autosave object.
 
 *Returns*
 
 Whether the post can be autosaved.
-
-### getAutosave
-
-Returns the current autosave, or null if one is not set (i.e. if the post
-has yet to be autosaved, or has been saved or published since the last
-autosave).
-
-*Parameters*
-
- * state: Editor state.
-
-*Returns*
-
-Current autosave, if exists.
-
-### hasAutosave
-
-Returns the true if there is an existing autosave, otherwise false.
-
-*Parameters*
-
- * state: Global application state.
-
-*Returns*
-
-Whether there is an existing autosave.
 
 ### isEditedPostBeingScheduled
 
@@ -1479,15 +1440,6 @@ post has been received, either by initialization or save.
 *Parameters*
 
  * post: Post object.
-
-### resetAutosave
-
-Returns an action object used in signalling that the latest autosave of the
-post has been received, by initialization or autosave.
-
-*Parameters*
-
- * post: Autosave post object.
 
 ### updatePost
 

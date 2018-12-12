@@ -7,7 +7,7 @@ import { filter } from 'lodash';
 /**
  * Internal dependencies
  */
-import { terms, entities, embedPreviews } from '../reducer';
+import { terms, entities, embedPreviews, autosave } from '../reducer';
 
 describe( 'terms()', () => {
 	it( 'returns an empty object by default', () => {
@@ -114,6 +114,38 @@ describe( 'embedPreviews()', () => {
 
 		expect( state ).toEqual( {
 			'http://twitter.com/notnownikki': { data: 42 },
+		} );
+	} );
+} );
+
+describe( 'autosave', () => {
+	it( 'returns null by default', () => {
+		const state = autosave( undefined, {} );
+
+		expect( state ).toBe( null );
+	} );
+
+	it( 'returns subset of received autosave post properties', () => {
+		const state = autosave( undefined, {
+			type: 'RESET_AUTOSAVE',
+			post: {
+				title: {
+					raw: 'The Title',
+				},
+				content: {
+					raw: 'The Content',
+				},
+				excerpt: {
+					raw: 'The Excerpt',
+				},
+				status: 'draft',
+			},
+		} );
+
+		expect( state ).toEqual( {
+			title: 'The Title',
+			content: 'The Content',
+			excerpt: 'The Excerpt',
 		} );
 	} );
 } );

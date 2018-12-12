@@ -319,26 +319,6 @@ export function getEditedPostAttribute( state, attributeName ) {
 }
 
 /**
- * Returns an attribute value of the current autosave revision for a post, or
- * null if there is no autosave for the post.
- *
- * @param {Object} state         Global application state.
- * @param {string} attributeName Autosave attribute name.
- *
- * @return {*} Autosave attribute value.
- */
-export function getAutosaveAttribute( state, attributeName ) {
-	if ( ! hasAutosave( state ) ) {
-		return null;
-	}
-
-	const autosave = getAutosave( state );
-	if ( autosave.hasOwnProperty( attributeName ) ) {
-		return autosave[ attributeName ];
-	}
-}
-
-/**
  * Returns the current visibility of the post being edited, preferring the
  * unsaved value if different than the saved post. The return value is one of
  * "private", "password", or "public".
@@ -484,18 +464,19 @@ export function isEditedPostEmpty( state ) {
 /**
  * Returns true if the post can be autosaved, or false otherwise.
  *
- * @param  {Object}  state Global application state.
+ * @param  {Object} state    Global application state.
+ * @param  {Object} autosave An autosave object.
  *
  * @return {boolean} Whether the post can be autosaved.
  */
-export function isEditedPostAutosaveable( state ) {
+export function isEditedPostAutosaveable( state, autosave ) {
 	// A post must contain a title, an excerpt, or non-empty content to be valid for autosaving.
 	if ( ! isEditedPostSaveable( state ) ) {
 		return false;
 	}
 
 	// If we don't already have an autosave, the post is autosaveable.
-	if ( ! hasAutosave( state ) ) {
+	if ( ! autosave ) {
 		return true;
 	}
 
@@ -508,34 +489,9 @@ export function isEditedPostAutosaveable( state ) {
 	}
 
 	// If the title, excerpt or content has changed, the post is autosaveable.
-	const autosave = getAutosave( state );
 	return [ 'title', 'excerpt' ].some( ( field ) => (
 		autosave[ field ] !== getEditedPostAttribute( state, field )
 	) );
-}
-
-/**
- * Returns the current autosave, or null if one is not set (i.e. if the post
- * has yet to be autosaved, or has been saved or published since the last
- * autosave).
- *
- * @param {Object} state Editor state.
- *
- * @return {?Object} Current autosave, if exists.
- */
-export function getAutosave( state ) {
-	return state.autosave;
-}
-
-/**
- * Returns the true if there is an existing autosave, otherwise false.
- *
- * @param {Object} state Global application state.
- *
- * @return {boolean} Whether there is an existing autosave.
- */
-export function hasAutosave( state ) {
-	return !! getAutosave( state );
 }
 
 /**

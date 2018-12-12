@@ -45,8 +45,6 @@ const {
 	isEditedPostPublishable,
 	isEditedPostSaveable,
 	isEditedPostAutosaveable,
-	getAutosave,
-	hasAutosave,
 	isEditedPostEmpty,
 	isEditedPostBeingScheduled,
 	isEditedPostDateFloating,
@@ -64,7 +62,6 @@ const {
 	getBlockHierarchyRootClientId,
 	getCurrentPostAttribute,
 	getEditedPostAttribute,
-	getAutosaveAttribute,
 	getGlobalBlockCount,
 	getMultiSelectedBlockClientIds,
 	getMultiSelectedBlocks,
@@ -627,42 +624,6 @@ describe( 'selectors', () => {
 				a: 1,
 				b: 2,
 			} );
-		} );
-	} );
-
-	describe( 'getAutosaveAttribute', () => {
-		it( 'returns null if there is no autosave', () => {
-			const state = {
-				autosave: null,
-			};
-
-			expect( getAutosaveAttribute( state, 'title' ) ).toBeNull();
-		} );
-
-		it( 'returns undefined for an attribute which is not set', () => {
-			const state = {
-				autosave: {},
-			};
-
-			expect( getAutosaveAttribute( state, 'foo' ) ).toBeUndefined();
-		} );
-
-		it( 'returns undefined for object prototype member', () => {
-			const state = {
-				autosave: {},
-			};
-
-			expect( getAutosaveAttribute( state, 'valueOf' ) ).toBeUndefined();
-		} );
-
-		it( 'returns the attribute value', () => {
-			const state = {
-				autosave: {
-					title: 'Hello World',
-				},
-			};
-
-			expect( getAutosaveAttribute( state, 'title' ) ).toBe( 'Hello World' );
 		} );
 	} );
 
@@ -1322,6 +1283,10 @@ describe( 'selectors', () => {
 
 	describe( 'isEditedPostAutosaveable', () => {
 		it( 'should return false if the post is not saveable', () => {
+			const autosave = {
+				title: 'sassel',
+			};
+
 			const state = {
 				editor: {
 					present: {
@@ -1339,12 +1304,9 @@ describe( 'selectors', () => {
 				saving: {
 					requesting: true,
 				},
-				autosave: {
-					title: 'sassel',
-				},
 			};
 
-			expect( isEditedPostAutosaveable( state ) ).toBe( false );
+			expect( isEditedPostAutosaveable( state, autosave ) ).toBe( false );
 		} );
 
 		it( 'should return true if there is not yet an autosave', () => {
@@ -1363,13 +1325,17 @@ describe( 'selectors', () => {
 					title: 'sassel',
 				},
 				saving: {},
-				autosave: null,
 			};
 
-			expect( isEditedPostAutosaveable( state ) ).toBe( true );
+			expect( isEditedPostAutosaveable( state, null ) ).toBe( true );
 		} );
 
 		it( 'should return false if none of title, excerpt, or content have changed', () => {
+			const autosave = {
+				title: 'foo',
+				excerpt: 'foo',
+			};
+
 			const state = {
 				editor: {
 					present: {
@@ -1385,16 +1351,17 @@ describe( 'selectors', () => {
 					excerpt: 'foo',
 				},
 				saving: {},
-				autosave: {
-					title: 'foo',
-					excerpt: 'foo',
-				},
 			};
 
-			expect( isEditedPostAutosaveable( state ) ).toBe( false );
+			expect( isEditedPostAutosaveable( state, autosave ) ).toBe( false );
 		} );
 
 		it( 'should return true if content has changes', () => {
+			const autosave = {
+				title: 'foo',
+				excerpt: 'foo',
+			};
+
 			const state = {
 				editor: {
 					present: {
@@ -1409,18 +1376,19 @@ describe( 'selectors', () => {
 					excerpt: 'foo',
 				},
 				saving: {},
-				autosave: {
-					title: 'foo',
-					excerpt: 'foo',
-				},
 			};
 
-			expect( isEditedPostAutosaveable( state ) ).toBe( true );
+			expect( isEditedPostAutosaveable( state, autosave ) ).toBe( true );
 		} );
 
 		it( 'should return true if title or excerpt have changed', () => {
 			for ( const variantField of [ 'title', 'excerpt' ] ) {
 				for ( const constantField of without( [ 'title', 'excerpt' ], variantField ) ) {
+					const autosave = {
+						[ constantField ]: 'foo',
+						[ variantField ]: 'bar',
+					};
+
 					const state = {
 						editor: {
 							present: {
@@ -1436,58 +1404,11 @@ describe( 'selectors', () => {
 							content: 'foo',
 						},
 						saving: {},
-						autosave: {
-							[ constantField ]: 'foo',
-							[ variantField ]: 'bar',
-						},
 					};
 
-					expect( isEditedPostAutosaveable( state ) ).toBe( true );
+					expect( isEditedPostAutosaveable( state, autosave ) ).toBe( true );
 				}
 			}
-		} );
-	} );
-
-	describe( 'getAutosave', () => {
-		it( 'returns null if there is no autosave', () => {
-			const state = {
-				autosave: null,
-			};
-
-			const result = getAutosave( state );
-
-			expect( result ).toBe( null );
-		} );
-
-		it( 'returns the autosave', () => {
-			const autosave = { title: '', excerpt: '', content: '' };
-			const state = { autosave };
-
-			const result = getAutosave( state );
-
-			expect( result ).toEqual( autosave );
-		} );
-	} );
-
-	describe( 'hasAutosave', () => {
-		it( 'returns false if there is no autosave', () => {
-			const state = {
-				autosave: null,
-			};
-
-			const result = hasAutosave( state );
-
-			expect( result ).toBe( false );
-		} );
-
-		it( 'returns true if there is a autosave', () => {
-			const state = {
-				autosave: { title: '', excerpt: '', content: '' },
-			};
-
-			const result = hasAutosave( state );
-
-			expect( result ).toBe( true );
 		} );
 	} );
 

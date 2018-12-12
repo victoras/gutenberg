@@ -234,6 +234,42 @@ export function hasUploadPermissions( state = {}, action ) {
 	return state;
 }
 
+/**
+ * Reducer returning the most recent autosave.
+ *
+ * @param  {Object} state  The autosave object.
+ * @param  {Object} action Dispatched action.
+ *
+ * @return {Object} Updated state.
+ */
+export function autosave( state = null, action ) {
+	switch ( action.type ) {
+		case 'RESET_AUTOSAVE':
+			const { post } = action;
+			const [ title, excerpt, content ] = [
+				'title',
+				'excerpt',
+				'content',
+			].map( ( field ) => {
+				// TODO - this is a duplication of editor/store/reducer #getPostRawValue. Unduplicate.
+				const value = post[ field ];
+				if ( value && 'object' === typeof value && 'raw' in value ) {
+					return value.raw;
+				}
+
+				return value;
+			} );
+
+			return {
+				title,
+				excerpt,
+				content,
+			};
+	}
+
+	return state;
+}
+
 export default combineReducers( {
 	terms,
 	users,
@@ -242,4 +278,5 @@ export default combineReducers( {
 	entities,
 	embedPreviews,
 	hasUploadPermissions,
+	autosave,
 } );
