@@ -1,7 +1,17 @@
 /**
  * External dependencies
  */
-import { isEmpty, get, unescape as unescapeString, find, throttle, uniqBy, invoke } from 'lodash';
+import {
+	escape as escapeString,
+	find,
+	get,
+	invoke,
+	isEmpty,
+	map,
+	throttle,
+	unescape as unescapeString,
+	uniqBy,
+} from 'lodash';
 
 /**
  * WordPress dependencies
@@ -37,6 +47,17 @@ class FlatTermSelector extends Component {
 			availableTerms: [],
 			selectedTerms: [],
 		};
+	}
+
+	unescapeTerm( term ) {
+		return {
+			...term,
+			name: unescapeString( term.name ),
+		};
+	}
+
+	unescapeTerms( terms ) {
+		return map( terms, this.unescapeTerm );
 	}
 
 	componentDidMount() {
@@ -79,7 +100,7 @@ class FlatTermSelector extends Component {
 		const request = apiFetch( {
 			path: addQueryArgs( `/wp/v2/${ taxonomy.rest_base }`, query ),
 		} );
-		request.then( ( terms ) => {
+		request.then( this.unescapeTerms ).then( ( terms ) => {
 			this.setState( ( state ) => ( {
 				availableTerms: state.availableTerms.concat(
 					terms.filter( ( term ) => ! find( state.availableTerms, ( availableTerm ) => availableTerm.id === term.id ) )
@@ -107,18 +128,19 @@ class FlatTermSelector extends Component {
 
 	findOrCreateTerm( termName ) {
 		const { taxonomy } = this.props;
+		const termNameEscaped = escapeString( termName );
 		// Tries to create a term or fetch it if it already exists.
 		return apiFetch( {
 			path: `/wp/v2/${ taxonomy.rest_base }`,
 			method: 'POST',
-			data: { name: termName },
-		} ).catch( ( error ) => {
+			data: { name: termNameEscaped },
+		} ).then( this.unescapeTerm ).catch( ( error ) => {
 			const errorCode = error.code;
 			if ( errorCode === 'term_exists' ) {
 				// If the terms exist, fetch it instead of creating a new one.
 				this.addRequest = apiFetch( {
-					path: addQueryArgs( `/wp/v2/${ taxonomy.rest_base }`, { ...DEFAULT_QUERY, search: termName } ),
-				} );
+					path: addQueryArgs( `/wp/v2/${ taxonomy.rest_base }`, { ...DEFAULT_QUERY, search: termNameEscaped } ),
+				} ).then( this.unescapeTerms );
 				return this.addRequest.then( ( searchResult ) => {
 					return find( searchResult, ( result ) => isSameTermName( result.name, termName ) );
 				} );
@@ -189,7 +211,6 @@ class FlatTermSelector extends Component {
 		return (
 			<FormTokenField
 				value={ selectedTerms }
-				displayTransform={ unescapeString }
 				suggestions={ termNames }
 				onChange={ this.onChange }
 				onInputChange={ this.searchTerms }
