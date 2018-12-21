@@ -189,7 +189,6 @@ class BlockList extends Component {
 				{ map( blockClientIds, ( clientId, blockIndex ) => (
 					<BlockListBlock
 						key={ 'block-' + clientId }
-						index={ blockIndex }
 						clientId={ clientId }
 						blockRef={ this.setBlockRef }
 						onSelectionStart={ this.onSelectionStart }

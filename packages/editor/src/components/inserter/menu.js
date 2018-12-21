@@ -132,8 +132,7 @@ export class InserterMenu extends Component {
 
 		const { showInsertionPoint, hideInsertionPoint } = this.props;
 		if ( item ) {
-			const { rootClientId, index } = this.props;
-			showInsertionPoint( rootClientId, index );
+			showInsertionPoint();
 		} else {
 			hideInsertionPoint();
 		}
@@ -366,24 +365,54 @@ export default compose(
 			rootClientId,
 		};
 	} ),
-	withDispatch( ( dispatch, ownProps ) => {
+	withDispatch( ( dispatch, ownProps, { select } ) => {
 		const {
 			__experimentalFetchReusableBlocks: fetchReusableBlocks,
 			showInsertionPoint,
 			hideInsertionPoint,
 		} = dispatch( 'core/editor' );
 
+		// eslint-disable-next-line no-restricted-syntax
+		function getInsertionPoint() {
+			const {
+				getBlockInsertionPoint,
+				getBlockIndex,
+			} = select( 'core/editor' );
+			const { clientId, rootClientId } = ownProps;
+			let insertionRootClientId, insertionIndex;
+			if ( rootClientId === undefined && clientId === undefined ) {
+				// Unless explicitly provided, the default insertion point provided
+				// by the store occurs immediately following the selected block.
+				// Otherwise, the default behavior for an undefined index is to
+				// append block to the end of the rootClientId context.
+				const insertionPoint = getBlockInsertionPoint();
+				( { rootClientId: insertionRootClientId, index: insertionIndex } = insertionPoint );
+			} else {
+				insertionIndex = getBlockIndex( clientId, rootClientId );
+				insertionRootClientId = rootClientId;
+			}
+
+			return {
+				index: insertionIndex,
+				rootClientId: insertionRootClientId,
+			};
+		}
+
 		return {
 			fetchReusableBlocks,
-			showInsertionPoint,
+			showInsertionPoint() {
+				const { index, rootClientId } = getInsertionPoint();
+				showInsertionPoint( rootClientId, index );
+			},
 			hideInsertionPoint,
 			onSelect( item ) {
 				const {
 					replaceBlocks,
 					insertBlock,
 				} = dispatch( 'core/editor' );
-				const { selectedBlock, index, rootClientId } = ownProps;
+				const { selectedBlock } = ownProps;
 				const { name, initialAttributes } = item;
+				const { index, rootClientId } = getInsertionPoint();
 
 				const insertedBlock = createBlock( name, initialAttributes );
 				if ( selectedBlock && isUnmodifiedDefaultBlock( selectedBlock ) ) {
